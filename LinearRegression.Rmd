@@ -1,0 +1,209 @@
+---
+title: "Linear Regression Analysis"
+author: "Joseph Kolowski & Jared Stabach"
+date: "July 27, 2017"
+output:
+  #pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, prompt = TRUE, collapse = TRUE)
+```
+
+## R Practical Exercise
+### Manipulating Dataframes
+
+Now that you've learned the basics of **R** programming, we'll take things a step further.  This exercise will walk you through a linear regression analysis.
+
+We'll be working with the dataset "mtcars" which comes pre-loaded with R. The goal of this exercise is to test your basic skills in R programming, specifically in manipulating data, and to reiterate some principles in linear models, and in model comparison using AIC.  It will help as we move towards our ultimate goal of analyzing animal movement data.
+
+You may not be familiar with all the operations you need to execute in this exercise. Part of the goal with this exercise, however, is to get you to use the help commands and to search the internet for solutions to figure things out on your own
+
+Before we start, let's determine our working directory (as we did previously):
+
+```{r}
+getwd()
+```
+
+Now let's change the working directory to a location of your choosing. Create a folder if you don't have one already, then make sure your working directory is in this folder. If you already have a folder, just set the working directory to the folder you want to use.
+
+```{r, eval = F}
+setwd("D:/Jared/work/R/R_LinearRegression")
+```
+
+Start by loading the "mtcars"" dataset
+
+```{r}
+data(mtcars)
+```
+
+View the first 10 lines of the data set
+
+```{r}
+head(mtcars, 10)
+```
+
+Assess the overal structure of the data set to get a sense of the number and type of variables included
+
+```{r}
+str(mtcars)
+```
+
+Now use a different function that will give you a list of each variable with the mean, min and max of each
+
+```{r}
+summary(mtcars)
+```
+
+Since this is an exercise involving regression, let's have a quick look at all our variables together (since they are all numeric) by looking at scatterplots of each variable combination. Use the function "pairs" or "plot" on the data set.
+
+```{r}
+plot(mtcars)
+```
+
+You should be able to see cases where there seems to be a strong relationship between two variables. "mpg" vs. "wt" is a good example of this. This is miles per gallon vs. the weight of the car, and this makes sense. Is the slope here positive or negative?
+
+```{r, echo = F}
+paste("The slope is negative")
+```
+
+Now plot only these two variables against each other. 
+
+```{r}
+plot(mtcars$mpg ~ mtcars$wt)
+```
+
+Now you could plot any of the variables in the dataframe.  How would you change the 'x' and 'y' variables or add a title?  Use the help file `help(plot)` or `?plot` to determine the proper syntax.
+
+```{r}
+plot(mtcars$mpg ~ mtcars$wt, xlab="Weight", ylab="MPG", main="MPG vs Weight")
+```
+
+Calculate the correlation coefficient between the two variables, then perform a correlation test to see if they are significantly correlated.
+
+```{r}
+cor(mtcars$mpg, mtcars$wt)
+cor.test(mtcars$mpg, mtcars$wt)
+```
+
+The p-value shown is very small and the correlation coefficent of `r cor(mtcars$mpg,mtcars$wt)` is very high. We also note that this value is negative, meaning that as the weight increases, the fuel efficiency decreases.  Makes sense, no?
+
+Let's practice some data management before we look into these variables in more detail. Create a new dataset called "my_mtcars" that excludes the variables "vs" and "am" using vector notation. Then look at your new dataset to make sure it worked.  We don't necessarily need to remove these variables to continue the analysis.  We are simply doing this so that you can see how to manipulate dataframes.
+
+```{r}
+head(mtcars)
+my_mtcars <- mtcars[, -c(8,9)]
+head(my_mtcars, 10) 
+```
+
+Now, keeping the same name for your dataset, exclude the "gear" and "carb" columns without using vector notation. Instead use the "subset" function. Check out the help (`?subset`) for this function to figure out the way to exclude columns by name.  Note that I am deleting the initial dataset, because my syntax states to use the same name as the original file.  How could I do this without overwriting the dataframe?
+
+```{r}
+my_mtcars <- subset(my_mtcars, select = -c(gear, carb))
+```
+
+You should now have a dataset called my_mtcars that has 32 observations of 7 variables. Check this.
+
+```{r}
+str(my_mtcars)
+dim(my_mtcars)
+```
+
+What does `## [1] 32 7` tells us?  Remember vector notation?  Could I also use `nrow()` or `ncol()` to summarize the dataframe?  
+
+The variable "cyl" represents the # of cylinders in the car engine. You'll see this is classed as a numeric variable. However, we aren't necessarily interested in this as an actual number. For example, the average number of cylinders is not interesting. Rather, this makes more sense as a factor, or categorical variable. Let's use the 'as.factor' function to convert it, keeping the same variable name. Then check what the class of the variable is to see if it worked. 
+
+```{r}
+my_mtcars$cyl <- as.factor(my_mtcars$cyl)
+class(my_mtcars$cyl)
+```
+
+We can now use this factor variable to group different operations. "tapply" is a great function to use for grouped operations, similar to pivot tables in excel. Check the help for tapply and try to calculate the mean of "mpg" for each factor of the "cyl" variable.
+
+```{r}
+tapply(my_mtcars$mpg, my_mtcars$cyl, mean)
+```
+
+Now let's do boxplots of our two variables of interest (mpg, wt) to see if we have any outliers that we might need to exclude before we move ahead. First change your graphic parameter to show the two graphs side by side. How do you think you'd specify the title of each boxplot?
+
+```{r}
+par(mfrow=c(1, 2))
+boxplot(my_mtcars$mpg, main = "mpg")
+boxplot(my_mtcars$wt, main = "weight")  
+```
+
+You can hopefully see that two points are seen as outliers in the plot for wt. Use the code below to look at the values of any outliers from a boxplot, in this case for weight.
+
+```{r}
+boxplot.stats(my_mtcars$wt)$out
+```
+
+Before we move forward, let's exclude these two observations by using a logical expression that removes all points in the dataset where weight is greater than 5.3 tons. There are a few different ways to do this, as is the case with most things in **R**.
+
+```{r}
+my_mtcars <- subset(my_mtcars, wt <= 5.3)
+```
+
+### Linear Regression
+
+You should now have a dataset with 30 observations of 7 variables. Now let's move on to a linear regression analysis. Run a basic linear regression model, attempting to predict/explain the fuel efficiency of a car (mpg) based on its weight, and name the model output "lm1". Remember to use the "my_mtcars" dataset.
+
+```{r}
+lm1 <- lm(mpg ~ wt, data = my_mtcars)
+```
+
+Summarize the output of the regression model to investigate the beta coefficient and intercept values. 
+
+```{r}
+summary(lm1)
+```
+
+The slope value should be `r lm1$coefficients[[2]]`. This means that for each unit of weight added to a car (1 ton) the miles per gallon it achieves is predicted to REDUCE by a value of `r abs(lm1$coefficients[[2]])`.The intercept of `r lm1$coefficients[[1]]` sets the start of the regression line at the weight of zero. In this case, this isn't very useful (a car will not weigh zero tons) but it is a necessary element of describing a linear relationship. Here the equation for the line is mpg = 39.913 -6.287 (wt). Note that you can call the individual coefficients from a model directly using, in this example "lm1$coefficients".
+
+Now plot again a scatterplot of weight vs. mpg and draw the regression line, in <span style="color:blue">blue</span>. First return your graphing parameter to it's default setting of (1,1)
+
+```{r}
+par(mfrow=c(1, 1))
+plot(mpg ~ wt, data = my_mtcars)
+abline(lm1, col="blue")
+```
+
+Here are two other ways you can draw that line:
+
+```{r, eval = F}
+abline(coef = lm1$coefficients, col="green")
+abline(lm1$coefficients, col="red")
+```
+
+In any mathmatical modeling approach, there may be other variables, or some combination of variables that are most effective, and efficient, at predicting your response variable of interest. In this case our response variable is mpg. Looking at your plot of all the two-way relationships between variables, are there any other variables that may help predict mpg? Horsepower (hp) seems a potentially informative variable. The question now is, which model might be "best" at predicting mpg. We could have three options 1) mpg ~ wt, 2) mpg ~ wt + hp, or 3) mpg ~ hp. We've already tried the first one, run a linear regression model for the next two, giving them their appropriate names (lm2 and lm3), and look at the summary of their results.
+
+```{r}
+lm2 <- lm(mpg ~ wt + hp, data = my_mtcars)
+lm3 <- lm(mpg ~ hp, data = my_mtcars)
+summary(lm2)
+summary(lm3)
+```
+
+As you'll see, all 3 of these are reasonably good models. So which is optimal? Remember that AIC values are a good mechanism for model comparison, with a model being penalized for adding variables. When adding a variable, the improved fit of the model must be able to override this penalty, otherwise the improved fit will not be deemed worthwhile given the additional model complexity. Use the "AIC" function to compare the AIC values of our 3 models. The lowest AIC indicates a model is a "better" representation of the data.
+
+```{r}
+AIC(lm1)
+AIC(lm2)
+AIC(lm3)
+```
+
+What can we conclude? The best model (from the three we have tried) for predicting miles per gallon of a car uses the horsepower and weight of the car in the prediction (lm2). To finish, let's see if we can now use this model (lm2) to predict the fuel efficiency of a car with a hp = 225 and a wt = 4.0 tons. This is ultimately one of the main goals of a regression analyses. First, we need a dataframe with our new data to be used in the prediction. Then, we can use the `predict()` function to apply our linear equation to the new information.
+
+```{r}
+nd <- data.frame(hp = 225, wt = 4.0)
+predict(lm2, newdata = nd, type = "response")
+```
+
+We should be able to get this same value by simply writing our linear equation. That is: Our predicted response equals our intercept term, plus our coefficient for weight multiplied by the weight value, plus our coefficient for hp multiplied by our horsepower value (The function `predict()` just makes things a little easier for us). That is: 
+
+$$y_i = \beta_0 + \beta_i x_i + \epsilon_i$$
+
+```{r}
+lm2$coefficients[[1]] + (lm2$coefficients[[2]]*4.0) + (lm2$coefficients[[3]]*225)
+```
