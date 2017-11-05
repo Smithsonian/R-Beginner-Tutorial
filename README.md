@@ -1,6 +1,8 @@
 # R-Beginner-Tutorial
 Beginner Information for learning R
 
-Folder contails an R script and a html file created using R-Markdown (.Rmd file also included). The R file to export the R-markdown to R code also provided.
+Folder contails an R script (IntroR.R, an html file (IntroR.html) for viewing in a browser, and an R-Markdown (.Rmd). An export_to_R.R file is located in the ancillary_files directory.  This files is used simply to create the R script from the R-Markdown file. It is placed here for reference.
 
-The IntroR.Rmd and Export_to_R.R file are background information that are not needed to follow the tuturial. To follow the tutorial, open the IntroR.html file in your browser.  Then, use the IntroR.R file to walk through the commands interactively.
+To view the files and work with them directly, use the Download.zip file and save to your computer.  The IntroR.html file can then be used to follow the lecture and the IntroR.R file has the commands to work interactively.  
+
+I recommend using R-Studio for this exercise and setting the working directory to the location where you saved all the files.
