@@ -1,0 +1,277 @@
+---
+title: "Introduction to R Programming"
+author: "Jared Stabach & Joseph Kolowski"
+date: "July 24, 2017"
+output:
+  #pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Why use R?
+
+**R** is a statistical programming language that is used broadly by researchers globally.  **R** is an attractive programming language because it is free, open source, and platform independent.  With all the libraries that are available (and those that are in rapid development), it is quickly becoming a one stop shop for all your analysis needs.  Most academic statisticians now use **R**, which has allowed for greater sharing of **R** code or packages to implement their advice.  One of the very first things we ask when hiring someone is simply, "Can you describe your **R** or statistical programming experience?".  It is a must to have this background to get a good position in the sciences (and many other fields). 
+
+**R** does have a steep learning curve that can often be very intimidating to new users.  This can be very frustrating.  Like learning a language, you must practice and continually use the program.  My advice to you is to push yourself to use this tool in everything you do.  At first, **R** will not be the easiest or quickest option.  With persistence, however, I believe you will see the benefit of **R** and continue to use it in your work.
+
+## Getting Started
+
+For this tutorial, we will be using **RStudio**, an enterprise-ready professional software tool that integrates with **R**.  It is has some nice features beyond the normal **R** interface, which many feel make it easier to use than **R**.  Ultimately, however, it is up to you to decide what you prefer to use. I prefer the basic **R** interface, although I do see the value in using **RStudio**.  
+
+If you haven't done so already:
+
+1. Install **R** at the [Comprehensive R Archive Network](https://cran.r-project.org/) (CRAN).  
+2. Download and install [RStudio](https://www.rstudio.com/products/rstudio/download/).
+
+### Getting Help
+
+One of the most useful commands in **R** is `?`.  At the command prompt (signified by `>`), type `?` followed by any command and you will be prompted with a help page for that command (e.g., `?plot`).
+
+The internet also contains a vast quantity of useful information.  There are blogs, mailing lists, and various websites (e.g., https://stackoverflow.com/) dedicated to providing information about **R** (and other things).  The trick is usually determining the key terms to limit your search.  I generally start any web-based search with **"R-Cran"**, limiting and focusing the search.  Using "**R**" as part of your key terms does not, by itself, limit the search.
+
+### Setting your working directory
+
+Like any other program or analysis, you should first define your working directory.  This will be the location where any files you save will be located.  To determine your current working directory, type: 
+
+```{r, eval = F}
+getwd()
+```
+
+Use `setwd()` to set a new working directory.  I've already created a location that I want to set as my working directory.  But, you could also use the command prompt to create a new directory and then set that as your working directory.
+
+```{r, eval = F}
+setwd("D:/Jared/work/R/R_Practice")
+dir.create("TempFolder")
+setwd("D:/Jared/work/R/R_Practice/TempFolder")
+```
+
+You may also want to see if there are any objects that are temporarily saved in your current **R** session.  These can be viewed:
+
+```{r, eval=F}
+ls()
+```
+
+You can delete individual objects to clear your working directory (`rm(dataset)`), or start every script with the following command to make sure you are starting fresh (this is good programming practice):
+
+```{r}
+rm(list=ls())
+```
+
+## Basics
+
+### Calculations
+
+**R** can be used and will print the results for any basic calculation.  The `>` symbol is the prompt for the input.
+
+```{r calculations}
+4+2
+6*8
+(842-62)/3
+```
+
+### Vector creation
+
+Vectors are a basic data structure in **R**.  They list data and can contain characters, numbers, or be TRUE/FALSE values.  *Remember: If you are unsure or need help, use the help function (e.g., `help(seq)` or `?seq`)*.
+
+```{r vectors}
+1:20
+c(1,2,3,4,5)
+seq(0,100,by=10)
+rep(1:5,5)
+rep("A rolling stone gathers no moss",4)
+```
+
+### Value Assignment
+
+Since **R** is a programming language, we can assign values to variables to avoid unnecessary repetition.  *Note that values are case sensitive.  'x' is not the same as 'X'!*
+
+```{r Values}
+x <- 1:10
+y <- c(1.5, 9, 3.46, 12.2)
+```
+
+To print results, you need to "ask"" **R** to do so by typing the variable again or surround your query with parentheses.  Do so for the variable `x`, to convince yourself how this works.  If you only wanted to see the first 5 values of 'x', how would you do that?  Or only the 2nd and 4th element of y?  What if you wanted to see all the records in `y`, except for the 2nd and 3rd records?
+
+```{r print}
+x
+(x <- 1:10)
+x[1:5]
+y[c(2,4)]
+y[-c(2,3)]
+```
+
+### Vector arithmetic
+
+By assigning variables to values, we can avoid typing extra characters.  How would you multiply the entire vector 1:10, which we have named `x`, by 3?  How would you combine your `x` and `y` vectors into a new vector?  Try some of the common arithmetic operators (`+`, `-`, `/`, `^`, `sqrt`, `log`, and `abs`).   
+
+``` {r arithmetic}
+x*3
+c(x,y)
+sqrt(x)
+```
+
+### Pre-existing Functions
+
+**R** also consists of many pre-existing functions.  Numeric functions include, `sum()`, `mean()`, `sd()`, `min()`, `max()`, `median`, `range`, `quantile`, or `summary`.  Try a few of these on the numeric vectors you have created.
+
+``` {r Vector functions}
+sum(x)
+summary(x)
+range(y)
+```
+
+## Matrices and Dataframes
+
+Matrices and dataframes are common ways to store tabular data.  Understanding how to manipulate them is important to be able to conduct more complex analyses.  Both matrices and dataframes are composed of rows and columns.  The main difference between matrices and dataframes is that dataframes can contain many different classes of data (numeric, character, etc.), while matrices can only contain a single class.
+
+Create a matrix with 4 rows and 5 columns using the data from `x` above.  Consult the help (e.g., `help(matrix)` or `?matrix`) to determine the syntax required.
+
+``` {r Matrix1}
+test_matrix <- matrix(data = x, nrow = 4, ncol = 5)
+test_matrix
+# Note, I could call this anything.  Best to name things in a way that are meaningful though!
+superman <- matrix(data = x, nrow = 4, ncol = 5)
+```
+
+Now, if we wanted to reference any value in the matrix, we could do so with matrix notation.  The first value in matrix notation references the row and the second value references the column.  COMMIT THIS TO MEMORY!  I remember this by thinking **R**oman **C**atholic.  So, if you wanted to view only the value in the 1st row, 5th column, you'd type:
+
+
+``` {r Matrix notation}
+#test_matrix(row,column)
+test_matrix[1,5]
+```
+
+What if you wanted to view all the values in the 4th column?  This literally says, all rows but only the 5th column.
+
+``` {r Matrix notation2}
+test_matrix[,4]
+```
+
+What about the 4th row? 
+
+``` {r Matrix notation2b}
+test_matrix[4,]
+```
+
+What if we wanted to view the values in the 3rd row, but only the 2nd and 4th columns?
+
+``` {r Matrix notation2c}
+test_matrix[3,c(2,4)]
+```
+
+What happens to the matrix if we append a character field?  Use the `cbind()` (column bind) command to bind a new column, called countries.  Note that I am not changing the contents of test_matrix.  Can you figure out how to do a row bind (hint: use `rbind()`) 
+
+``` {r Matrix notation3}
+countries <- c("United States", "Pakistan", "Ireland", "China")
+cbind(test_matrix,countries)
+
+#Note that I am not changing the contents of test_matrix.  I could, but I'd have to change my code to
+#test_matrix <- cbind(test_matrix,countries)
+```
+
+Why is everything inside the table now enclosed in quotes?  Recall what I said about matrices only containing one type of datatype.  What happens if I coerce this to a dataframe?
+
+``` {r Dataframe}
+test_dataframe <- data.frame(test_matrix,countries)
+test_dataframe
+# Have I changed the file type?
+class(test_dataframe)
+```
+
+Can I rename the column headings?
+
+``` {r Dataframe rename}
+names(test_dataframe) <- c("Val1", "Val2", "Val3", "Val4", "Val5", "Countries")
+test_dataframe
+# Also see the colnames() function
+```
+
+Can I use the same matrix notation to reference a particular row and column?  Are there other ways to reference a value?
+
+``` {r Dataframe ref}
+test_dataframe[3,5]
+test_dataframe[,5]
+test_dataframe$Val5[3]
+test_dataframe$Val5
+test_dataframe[,"Val5"]
+```
+
+You can also use some very simple commands to determine the size of dataframes or matrices.
+
+``` {r Dataframe dims}
+nrow(test_dataframe)
+ncol(test_dataframe)
+dim(test_dataframe)
+```
+
+## Other Resources
+
+This tutorial was meant as the first step towards learning **R**, but only begins to scratch the surface.  There are, however, a number of interactive learning exercises that can help with your understanding of **R**. Regardless of your skill level, you will undoubtedly be able to learn a considerable amount from these courses.  Even if you are familiar with **R**, this is a great way to refresh some basic concepts.
+
+Some resources for learning **R** include:
+
+  1. SWIRL: SWIRL is an interactive learning environment.  Users receive immediate feedback as they are guided through self-paced lessons in data science and **R** programming.  
+  2. http://r-statistics.co/R-Tutorial.html - This covers much of the same R Programming lessons as SWIRL, with a bit more useful detail in some cases. Strongly recommended for those not enjoying the SWIRL package as a learning environment. 
+  3. DataCamp - https://www.datacamp.com/courses/free-introduction-to-r/?tap_a=5644-dce66f&tap_s=10907-287229  Operates through your web browser. Free and interactive with tips, but will need to create a free account. 
+  4. Code School – O Reilly: http://tryr.codeschool.com/levels/1/challenges/1 This is a pirate-themed tutorial, but is nicely done, browser-based, and includes data formats, basic plotting and data summary. No need to sign up if you do the 8 lessons in one sitting (should take around 1-2 hours), but can set up a free account to save.
+  5. R intro manual from R Core Team: https://cran.r-project.org/doc/manuals/R-intro.pdf
+  
+### Installing SWIRL
+  
+SWIRL is essentially a user-generated program (also called a **package** or **library**) for use in **R**.  To access this, you must first install the package so it is accessible.  In the Console panel (bottom left), type the following and press ENTER:
+
+```{r install, eval = F}
+install.packages("swirl")
+
+# Data can also be installed locally if you've downloaded the zip file to your hard drive
+#install.packages("yourzip.tar.gz", repos=NULL)
+```
+
+This may take a little while, but when the stop sign in the upper right of the console window is gone, you can proceed. For any package you install in **R**, you need to essentially turn them on before using them. You can do this with the `require()` or `library()` functions. Type this now: 
+
+```{r install2, message=FALSE, warning = FALSE}
+require(swirl)
+```
+
+*Note: You may be prompted to select a “mirror” from which to download the package. If this is the case, it is recommended that you choose the mirror that is geographically closest to you.*
+
+To install the lesson, you will need to use:
+
+```{r install3, eval = F}
+install_from_swirl("R Programming")
+```
+
+*Find out more about other courses, and other download options here: https://github.com/swirldev/swirl_courses*
+
+#### SWIRL Lessons
+
+There are many lessons within **R**.  Once SWIRL is loaded (below), you will be given the option of which lessons to complete.  Some of the core lessons can be found in the initial section labeled **R Programming** (estimated time to compete required lessons is about 2 hours).  We recommend to start with the following lessons:
+
+  1. **Basic Building Blocks (10 min)**
+  2. **Workspace and Files (15 min)**
+  3. **Sequences of Numbers (5 min)**
+  4. **Vectors (8 min)**
+  5. **Missing Values (5 min)**
+  6. **Subsetting Vectors (12 min)**
+  7. **Matrices and Data Frames (13 min)**
+  8. Logic (optional)
+  9. **Functions (30 min)**
+  10. lapply and sapply (optional)
+  11. vapply and tapply (optional)
+  12. **Looking at Data (5 min)**
+  13. Simulation (optional)
+  14. **Dates and Times (10 min)**
+  15. **Base Graphics (10 Min)**
+
+#### Run SWIRL
+
+Type the following to begin using SWIRL. Also, when restarting your session later, you’ll need to “turn on” SWIRL each time with either `library(swirl)` or `require(swirl)`. 
+
+```{r install4, eval=F}
+swirl()
+```
+
+#### **Have fun!**
